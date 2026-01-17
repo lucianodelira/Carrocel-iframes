@@ -1,48 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>App Iframes Carrossel</title>
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  touch-action: pan-y;
+}
+
+/* BODY */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: Arial, sans-serif;
+}
+
+/* APP CONTAINER */
+.app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* CARROSSEL */
+.carousel {
+  display: flex;
+  width: 500vw; /* 5 iframes */
+  height: 100vh;
+  transition: transform 0.35s ease;
+}
+
+/* IFRAME FULLSCREEN */
+.carousel iframe {
+  width: 100vw;
+  height: 100vh;
+  border: none;
+  background: #000;
+}
+
+/* INDICADOR */
+.indicators {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 999;
+}
+
+.indicators span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+}
+
+.indicators .active {
+  background: #fff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="carousel" id="carousel">
+    <!-- TROQUE OS LINKS ABAIXO -->
+    <iframe src="https://exemplo1.com"></iframe>
+    <iframe src="https://exemplo2.com"></iframe>
+    <iframe src="https://exemplo3.com"></iframe>
+    <iframe src="https://exemplo4.com"></iframe>
+    <iframe src="https://exemplo5.com"></iframe>
+  </div>
+</div>
+
+<div class="indicators" id="indicators">
+  <span class="active"></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<script>
 const carousel = document.getElementById("carousel");
+const dots = document.querySelectorAll("#indicators span");
+
 let index = 0;
 let startX = 0;
 let currentX = 0;
-let isDragging = false;
+let dragging = false;
 
 function updateCarousel() {
   carousel.style.transform = `translateX(-${index * 100}vw)`;
+  dots.forEach((dot, i) => {
+    dot.classList.toggle("active", i === index);
+  });
 }
 
+/* TOUCH */
 carousel.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
-  isDragging = true;
+  dragging = true;
 });
 
 carousel.addEventListener("touchmove", e => {
-  if (!isDragging) return;
+  if (!dragging) return;
   currentX = e.touches[0].clientX;
 });
 
 carousel.addEventListener("touchend", () => {
   const diff = startX - currentX;
-
   if (diff > 50 && index < 4) index++;
   if (diff < -50 && index > 0) index--;
-
   updateCarousel();
-  isDragging = false;
+  dragging = false;
 });
 
-// Suporte a mouse (desktop)
-let mouseDown = false;
+/* MOUSE (DESKTOP) */
 carousel.addEventListener("mousedown", e => {
   startX = e.clientX;
-  mouseDown = true;
+  dragging = true;
 });
 
 carousel.addEventListener("mouseup", e => {
-  if (!mouseDown) return;
+  if (!dragging) return;
   currentX = e.clientX;
-
   const diff = startX - currentX;
   if (diff > 50 && index < 4) index++;
   if (diff < -50 && index > 0) index--;
-
   updateCarousel();
-  mouseDown = false;
+  dragging = false;
 });
+</script>
+
+</body>
+</html>
