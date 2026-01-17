@@ -2,61 +2,72 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>App Iframes Carrossel</title>
+<title>App Iframes Swipe</title>
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
-/* RESET */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  touch-action: pan-y;
 }
 
-/* BODY */
 html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
   background: #000;
-  font-family: Arial, sans-serif;
 }
 
-/* APP CONTAINER */
 .app {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 /* CARROSSEL */
 .carousel {
   display: flex;
-  width: 500vw; /* 5 iframes */
+  width: 500vw;
   height: 100vh;
-  transition: transform 0.35s ease;
+  transition: transform 0.3s ease;
 }
 
-/* IFRAME FULLSCREEN */
-.carousel iframe {
+.slide {
   width: 100vw;
   height: 100vh;
-  border: none;
-  background: #000;
+  position: relative;
 }
 
-/* INDICADOR */
+/* IFRAME */
+.slide iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* CAMADA DE SWIPE (TRANSPARENTE) */
+.swipe-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background: transparent;
+}
+
+/* INDICADORES */
 .indicators {
   position: fixed;
-  bottom: 10px;
+  bottom: 12px;
   width: 100%;
   display: flex;
   justify-content: center;
   gap: 8px;
-  z-index: 999;
+  z-index: 20;
 }
 
 .indicators span {
@@ -76,12 +87,32 @@ html, body {
 
 <div class="app">
   <div class="carousel" id="carousel">
-    <!-- TROQUE OS LINKS ABAIXO -->
-    <iframe src="https://app.acertos.club/pr/sbrqjugZ"></iframe>
-    <iframe src="https://app.feiticeira.club/pr/PRBJ9rmd"></iframe>
-    <iframe src="https://app.tigersclub.vip/pr/cmDAwXiS"></iframe>
-    <iframe src="https://app.vaidarboa.com/pr/d032gM1o"></iframe>
-    <iframe src="https://app.bancabrasileira.com.br/pr/EYZ6dslW"></iframe>
+
+    <div class="slide">
+      <iframe src="https://exemplo1.com"></iframe>
+      <div class="swipe-layer"></div>
+    </div>
+
+    <div class="slide">
+      <iframe src="https://exemplo2.com"></iframe>
+      <div class="swipe-layer"></div>
+    </div>
+
+    <div class="slide">
+      <iframe src="https://exemplo3.com"></iframe>
+      <div class="swipe-layer"></div>
+    </div>
+
+    <div class="slide">
+      <iframe src="https://exemplo4.com"></iframe>
+      <div class="swipe-layer"></div>
+    </div>
+
+    <div class="slide">
+      <iframe src="https://exemplo5.com"></iframe>
+      <div class="swipe-layer"></div>
+    </div>
+
   </div>
 </div>
 
@@ -96,52 +127,46 @@ html, body {
 <script>
 const carousel = document.getElementById("carousel");
 const dots = document.querySelectorAll("#indicators span");
+const swipeLayers = document.querySelectorAll(".swipe-layer");
 
 let index = 0;
 let startX = 0;
-let currentX = 0;
-let dragging = false;
+let endX = 0;
 
-function updateCarousel() {
+function update() {
   carousel.style.transform = `translateX(-${index * 100}vw)`;
-  dots.forEach((dot, i) => {
-    dot.classList.toggle("active", i === index);
-  });
+  dots.forEach((d, i) => d.classList.toggle("active", i === index));
 }
 
-/* TOUCH */
-carousel.addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-  dragging = true;
-});
+swipeLayers.forEach(layer => {
+  layer.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+  });
 
-carousel.addEventListener("touchmove", e => {
-  if (!dragging) return;
-  currentX = e.touches[0].clientX;
-});
+  layer.addEventListener("touchend", e => {
+    endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
 
-carousel.addEventListener("touchend", () => {
-  const diff = startX - currentX;
-  if (diff > 50 && index < 4) index++;
-  if (diff < -50 && index > 0) index--;
-  updateCarousel();
-  dragging = false;
-});
+    if (diff > 50 && index < 4) index++;
+    if (diff < -50 && index > 0) index--;
 
-/* MOUSE (DESKTOP) */
-carousel.addEventListener("mousedown", e => {
-  startX = e.clientX;
-  dragging = true;
-});
+    update();
+  });
 
-carousel.addEventListener("mouseup", e => {
-  if (!dragging) return;
-  currentX = e.clientX;
-  const diff = startX - currentX;
-  if (diff > 50 && index < 4) index++;
-  if (diff < -50 && index > 0) index--;
-  updateCarousel();
-  dragging = false;
+  // Desktop
+  layer.addEventListener("mousedown", e => {
+    startX = e.clientX;
+  });
+
+  layer.addEventListener("mouseup", e => {
+    endX = e.clientX;
+    const diff = startX - endX;
+
+    if (diff > 50 && index < 4) index++;
+    if (diff < -50 && index > 0) index--;
+
+    update();
+  });
 });
 </script>
 
